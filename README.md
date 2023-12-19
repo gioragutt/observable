@@ -24,10 +24,10 @@ hard-to-follow callback chains.
 ```js
 // Filtering and mapping:
 element
-	.on('click')
-	.filter((e) => e.target.matches('.foo'))
-	.map((e) => ({ x: e.clientX, y: e.clientY }))
-	.subscribe({ next: handleClickAtPoint });
+  .on('click')
+  .filter((e) => e.target.matches('.foo'))
+  .map((e) => ({ x: e.clientX, y: e.clientY }))
+  .subscribe({ next: handleClickAtPoint });
 ```
 
 #### Example 2
@@ -52,12 +52,12 @@ await element.on('mousemove')
 // Imperative
 const controller = new AbortController();
 element.addEventListener(
-	'mousemove',
-	(e) => {
-		element.addEventListener('mouseup', (e) => controller.abort());
-		console.log(e);
-	},
-	{ signal: controller.signal },
+  'mousemove',
+  (e) => {
+    element.addEventListener('mouseup', (e) => controller.abort());
+    console.log(e);
+  },
+  { signal: controller.signal },
 );
 ```
 
@@ -70,13 +70,13 @@ Tracking all link clicks within a container
 
 ```js
 container
-	.on('click')
-	.filter((e) => e.target.closest('a'))
-	.subscribe({
-		next: (e) => {
-			// …
-		},
-	});
+  .on('click')
+  .filter((e) => e.target.closest('a'))
+  .subscribe({
+    next: (e) => {
+      // …
+    },
+  });
 ```
 
 #### Example 4
@@ -86,10 +86,10 @@ Find the maximum Y coordinate while the mouse is held down
 
 ```js
 const maxY = await element
-	.on('mousemove')
-	.takeUntil(element.on('mouseup'))
-	.map((e) => e.clientY)
-	.reduce((soFar, y) => Math.max(soFar, y), 0);
+  .on('mousemove')
+  .takeUntil(element.on('mouseup'))
+  .map((e) => e.clientY)
+  .reduce((soFar, y) => Math.max(soFar, y), 0);
 ```
 
 #### Example 5
@@ -146,51 +146,51 @@ googController.abort();
 ```js
 // Imperative
 function multiplex({ startMsg, stopMsg, match }) {
-	const start = (callback) => {
-		const teardowns = [];
+  const start = (callback) => {
+    const teardowns = [];
 
-		if (socket.readyState !== WebSocket.OPEN) {
-			const openHandler = () => start({ startMsg, stopMsg, match })(callback);
-			socket.addEventListener('open', openHandler);
-			teardowns.push(() => {
-				socket.removeEventListener('open', openHandler);
-			});
-		} else {
-			socket.send(JSON.stringify(startMsg));
-			const messageHandler = (e) => {
-				const data = JSON.parse(e.data);
-				if (match(data)) {
-					callback(data);
-				}
-			};
-			socket.addEventListener('message', messageHandler);
-			teardowns.push(() => {
-				socket.send(JSON.stringify(stopMsg));
-				socket.removeEventListener('message', messageHandler);
-			});
-		}
+    if (socket.readyState !== WebSocket.OPEN) {
+      const openHandler = () => start({ startMsg, stopMsg, match })(callback);
+      socket.addEventListener('open', openHandler);
+      teardowns.push(() => {
+        socket.removeEventListener('open', openHandler);
+      });
+    } else {
+      socket.send(JSON.stringify(startMsg));
+      const messageHandler = (e) => {
+        const data = JSON.parse(e.data);
+        if (match(data)) {
+          callback(data);
+        }
+      };
+      socket.addEventListener('message', messageHandler);
+      teardowns.push(() => {
+        socket.send(JSON.stringify(stopMsg));
+        socket.removeEventListener('message', messageHandler);
+      });
+    }
 
-		const finalize = () => {
-			teardowns.forEach((t) => t());
-		};
+    const finalize = () => {
+      teardowns.forEach((t) => t());
+    };
 
-		socket.addEventListener('close', finalize);
-		teardowns.push(() => socket.removeEventListener('close', finalize));
-		socket.addEventListener('error', finalize);
-		teardowns.push(() => socket.removeEventListener('error', finalize));
+    socket.addEventListener('close', finalize);
+    teardowns.push(() => socket.removeEventListener('close', finalize));
+    socket.addEventListener('error', finalize);
+    teardowns.push(() => socket.removeEventListener('error', finalize));
 
-		return finalize;
-	};
+    return finalize;
+  };
 
-	return start;
+  return start;
 }
 
 function streamStock(ticker) {
-	return multiplex({
-		startMsg: { ticker, type: 'sub' },
-		stopMsg: { ticker, type: 'unsub' },
-		match: (data) => data.ticker === ticker,
-	});
+  return multiplex({
+    startMsg: { ticker, type: 'sub' },
+    stopMsg: { ticker, type: 'unsub' },
+    match: (data) => data.ticker === ticker,
+  });
 }
 
 const googTrades = streamStock('GOOG');
@@ -214,36 +214,36 @@ keys the user might hit while using an app:
 
 ```js
 const pattern = [
-	'ArrowUp',
-	'ArrowUp',
-	'ArrowDown',
-	'ArrowDown',
-	'ArrowLeft',
-	'ArrowRight',
-	'ArrowLeft',
-	'ArrowRight',
-	'b',
-	'a',
-	'b',
-	'a',
-	'Enter',
+  'ArrowUp',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowLeft',
+  'ArrowRight',
+  'b',
+  'a',
+  'b',
+  'a',
+  'Enter',
 ];
 
 const keys = document.on('keydown').map((e) => e.key);
 keys
-	.flatMap((firstKey) => {
-		if (firstKey === pattern[0]) {
-			return keys
-				.take(pattern.length - 1)
-				.every((k, i) => k === pattern[i + 1]);
-		}
-	})
-	.filter((matched) => matched)
-	.subscribe({
-		next: (_) => {
-			console.log('Secret code matched!');
-		},
-	});
+  .flatMap((firstKey) => {
+    if (firstKey === pattern[0]) {
+      return keys
+        .take(pattern.length - 1)
+        .every((k, i) => k === pattern[i + 1]);
+    }
+  })
+  .filter((matched) => matched)
+  .subscribe({
+    next: (_) => {
+      console.log('Secret code matched!');
+    },
+  });
 ```
 
 <details>
@@ -305,16 +305,16 @@ via the `next()` callback, optionally followed by a single call to either
 
 ```js
 const observable = new Observable((subscriber) => {
-	let i = 0;
-	setInterval(() => {
-		if (i >= 10) subscriber.complete();
-		else subscriber.next(i++);
-	}, 2000);
+  let i = 0;
+  setInterval(() => {
+    if (i >= 10) subscriber.complete();
+    else subscriber.next(i++);
+  }, 2000);
 });
 
 observable.subscribe({
-	// Print each value the Observable produces.
-	next: console.log,
+  // Print each value the Observable produces.
+  next: console.log,
 });
 ```
 
@@ -381,17 +381,17 @@ synchronously emits data _during_ subscription:
 ```js
 // An observable that synchronously emits unlimited data during subscription.
 let observable = new Observable((subscriber) => {
-	let i = 0;
-	while (true) {
-		subscriber.next(i++);
-	}
+  let i = 0;
+  while (true) {
+    subscriber.next(i++);
+  }
 });
 
 let controller = new AbortController();
 observable.subscribe({
-	next: (data) => {
-		if (data > 100) controller.abort();
-	}}, {signal: controller.signal},
+  next: (data) => {
+    if (data > 100) controller.abort();
+  }}, {signal: controller.signal},
 });
 ```
 
@@ -575,12 +575,12 @@ integration. Specifically, the following innocent-looking code would not _always
 
 ```js
 element
-	.on('click')
-	.first()
-	.then((e) => {
-		e.preventDefault();
-		// Do something custom...
-	});
+  .on('click')
+  .first()
+  .then((e) => {
+    e.preventDefault();
+    // Do something custom...
+  });
 ```
 
 If `Observable#first()` returns a Promise that resolves when the first event is fired on an
@@ -624,27 +624,28 @@ case where your `e.preventDefault()` might run too late:
 
 ```js
 element
-	.on('click')
-	.map((e) => (e.preventDefault(), e))
-	.first();
+  .on('click')
+  .map((e) => (e.preventDefault(), e))
+  .first();
 ```
 
 ...or if Observable had a `.do()` method (see https://github.com/whatwg/dom/issues/544#issuecomment-351457179):
 
 ```js
 element
-	.on('click')
-	.do((e) => e.preventDefault())
-	.first();
+  .on('click')
+  .do((e) => e.preventDefault())
+  .first();
 ```
 
 ...or by [modifying](https://github.com/whatwg/dom/issues/544#issuecomment-351779661) the semantics of
 `first()` to take a callback that produces a value that the returned Promise resolves to:
 
 ```js
-el.on('submit')
-	.first((e) => e.preventDefault())
-	.then(doMoreStuff);
+element
+  .on('submit')
+  .first((e) => e.preventDefault())
+  .then(doMoreStuff);
 ```
 
 Second, this "quirk" already exists in today's thriving Observable ecosystem, and there are no serious
